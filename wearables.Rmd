@@ -1,0 +1,27 @@
+---
+title: "Practical Machine Learning Assignment"
+output: html_document
+---
+In this document I will try to use data collected from wearable fitness sensors to classify an exercise to a few categories that represent a correct repetition or an incorrect one. First, lets load the libraries that will be used in the analysis:
+```{r, warning=FALSE}
+library(caret)
+library(randomForest)
+```
+Next, I will load the data set. Since we have a few parameters in the dataset that do not exist in the test set, I will subset only the parameters that relate to movement data:
+
+```{r, warning=FALSE}
+data = read.csv('pml-training.csv')
+features = c("roll_belt",	"pitch_belt","yaw_belt", "total_accel_belt", "gyros_belt_x","gyros_belt_y","gyros_belt_z","accel_belt_x","accel_belt_y","accel_belt_z","magnet_belt_x","magnet_belt_y","magnet_belt_z","roll_arm","pitch_arm","yaw_arm","total_accel_arm","gyros_arm_x","gyros_arm_y","gyros_arm_z","accel_arm_x","accel_arm_y","accel_arm_z","magnet_arm_x","magnet_arm_y","magnet_arm_z","roll_dumbbell","pitch_dumbbell","yaw_dumbbell","total_accel_dumbbell","gyros_dumbbell_x","gyros_dumbbell_y","gyros_dumbbell_z","accel_dumbbell_x","accel_dumbbell_y","accel_dumbbell_z","magnet_dumbbell_x","magnet_dumbbell_y","magnet_dumbbell_z","roll_forearm","pitch_forearm","yaw_forearm","total_accel_forearm","gyros_forearm_x","gyros_forearm_y","gyros_forearm_z","accel_forearm_x","accel_forearm_y","accel_forearm_z","magnet_forearm_x","magnet_forearm_y","magnet_forearm_z"
+)
+train_features = c(features, "classe")
+train_data = data[,train_features]
+str(train_data)
+```
+As you can see, there are 52 variables and 19622 observations. In order to validate my classification results, I will be using a 10 fold cross validation. This method provides a resonable error estimate, and not too computationaly intensive. I have decided to use random forest which has very good results and is highly suited to classification problems. 
+
+```{r, warning=FALSE}
+train_control = trainControl(method="cv",number=10)
+model = train(classe~., data=train_data, method = "rf", trControl=train_control)
+print(model)
+```
+As can be seen from the model, the accuracy of the model is about 99%. I believe this is relatively close to the out of sample error, because of the use of CV.
